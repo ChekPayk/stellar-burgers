@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, ChangeEvent } from 'react';
 import {
   Input,
   Button,
@@ -26,16 +26,21 @@ export const ResetPasswordUI: FC<ResetPasswordUIProps> = ({
       >
         <div className='pb-6'>
           <PasswordInput
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              setPassword(e.target.value)
+            }
             value={password}
             name='password'
+            autoComplete='new-password'
           />
         </div>
         <div className='pb-6'>
           <Input
             type='text'
             placeholder='Введите код из письма'
-            onChange={(e) => setToken(e.target.value)}
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              setToken(e.target.value)
+            }
             value={token}
             name='token'
             error={false}
