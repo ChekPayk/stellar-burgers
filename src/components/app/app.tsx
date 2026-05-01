@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import {
   ConstructorPage,
@@ -18,24 +19,35 @@ import {
   ProtectedRoute
 } from '@components';
 import { Preloader } from '@ui';
+import { useDispatch, useSelector } from '../../services/store';
+import {
+  fetchIngredients,
+  selectIngredients,
+  selectIngredientsIsLoading,
+  selectIngredientsError
+} from '../../services/slices';
 import '../../index.css';
 import styles from './app.module.css';
 
 const App = () => {
+  const dispatch = useDispatch();
   const location = useLocation();
   const navigate = useNavigate();
   const background = location.state?.background;
 
-  /** TODO: взять переменные из стора */
-  const isIngredientsLoading = false;
-  const ingredients = [];
-  const error = null;
+  const ingredients = useSelector(selectIngredients);
+  const isIngredientsLoading = useSelector(selectIngredientsIsLoading);
+  const error = useSelector(selectIngredientsError);
+
+  useEffect(() => {
+    dispatch(fetchIngredients());
+  }, [dispatch]);
 
   const closeModal = () => {
     navigate(-1);
   };
 
-  // Загрузка или ошибка ингредиентов (позже перенесётся в стор)
+  // Загрузка или ошибка ингредиентов
   if (isIngredientsLoading) {
     return (
       <div className={styles.app}>
