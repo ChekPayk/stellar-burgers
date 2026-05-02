@@ -7,8 +7,7 @@ import {
   selectOrderRequest,
   selectOrderModalData,
   submitOrder,
-  closeOrderModal,
-  resetConstructor
+  closeOrderModal
 } from '../../services/slices';
 import { useNavigate } from 'react-router-dom';
 import { getCookie } from '../../utils/cookie';
@@ -41,7 +40,6 @@ export const BurgerConstructor: FC = () => {
 
   const closeOrderModalHandler = () => {
     dispatch(closeOrderModal());
-    dispatch(resetConstructor());
   };
 
   const price = useMemo(

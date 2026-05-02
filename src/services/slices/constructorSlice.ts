@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction, createSelector } from '@reduxjs/toolkit';
+import { submitOrder } from './orderSlice';
 import { TConstructorIngredient, TIngredient } from '@utils-types';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -57,6 +58,12 @@ const constructorSlice = createSlice({
   selectors: {
     selectConstructorBun: (state) => state.bun,
     selectConstructorIngredients: (state) => state.ingredients
+  },
+  extraReducers: (builder) => {
+    builder.addCase(submitOrder.fulfilled, (state) => {
+      state.bun = null;
+      state.ingredients = [];
+    });
   }
 });
 
