@@ -1,4 +1,4 @@
-import { configureStore } from '@reduxjs/toolkit';
+import { combineReducers } from '@reduxjs/toolkit';
 import ingredientsReducer from '../ingredientsSlice';
 import feedReducer from '../feedSlice';
 import constructorReducer from '../constructorSlice';
@@ -6,22 +6,18 @@ import userReducer from '../userSlice';
 import orderReducer from '../orderSlice';
 import ordersReducer from '../ordersSlice';
 
-const rootReducer = {
+const rootReducer = combineReducers({
   ingredients: ingredientsReducer,
   feed: feedReducer,
   burgerConstructor: constructorReducer,
   user: userReducer,
   order: orderReducer,
   orders: ordersReducer,
-};
+});
 
 describe('rootReducer initialization', () => {
-  it('should initialize all slices with correct initial state', () => {
-    const store = configureStore({
-      reducer: rootReducer,
-    });
-
-    const state = store.getState();
+  it('should return initial state when called with undefined and UNKNOWN_ACTION', () => {
+    const state = rootReducer(undefined, { type: 'UNKNOWN_ACTION' });
 
     // ingredients slice
     expect(state.ingredients).toEqual({

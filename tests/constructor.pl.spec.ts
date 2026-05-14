@@ -27,73 +27,83 @@ test.describe('Constructor Page', () => {
     await page.goto('/');
   });
 
-  test('should display ingredients from API', async ({ page }) => {
-    // Wait for ingredients to load
-    await page.waitForSelector('text=Краторная булка N-200i');
-    await page.waitForSelector('text=Филе Люминесцентного тетраодонтимформа');
-    await page.waitForSelector('text=Соус Spicy-X');
+  const ingredientsSection = (page: Page) =>
+    page.locator('section').filter({ hasText: 'Булки' });
 
-    // Verify ingredient names are visible in the ingredients list
-    await expect(page.getByText('Краторная булка N-200i').first()).toBeVisible();
+  const constructorSection = (page: Page) =>
+    page.locator('section').filter({ hasText: 'Оформить заказ' });
+
+  const modalsContainer = (page: Page) => page.locator('#modals');
+
+  test('should display ingredients from API', async ({ page }) => {
+    const ingredients = ingredientsSection(page);
+
+    // Wait for ingredients to load within the ingredients section
     await expect(
-      page.getByText('Филе Люминесцентного тетраодонтимформа').first()
+      ingredients.getByText('Краторная булка N-200i')
     ).toBeVisible();
-    await expect(page.getByText('Соус Spicy-X').first()).toBeVisible();
+    await expect(
+      ingredients.getByText('Филе Люминесцентного тетраодонтимформа')
+    ).toBeVisible();
+    await expect(ingredients.getByText('Соус Spicy-X')).toBeVisible();
   });
 
   test('should add bun ingredient to constructor', async ({ page }) => {
     // Wait for ingredients to load
-    await page.waitForSelector('text=Краторная булка N-200i');
+    await expect(
+      ingredientsSection(page).getByText('Краторная булка N-200i')
+    ).toBeVisible();
 
     // Find the bun ingredient and click "Добавить"
-    const bunContainer = page
+    const bunContainer = ingredientsSection(page)
       .locator('li')
       .filter({ hasText: 'Краторная булка N-200i' });
-    const addButton = bunContainer.getByText('Добавить');
-    await addButton.click();
+    await bunContainer.getByText('Добавить').click();
+
+    const constructor = constructorSection(page);
 
     // Verify bun appears in constructor (top and bottom)
     await expect(
-      page.getByText('Краторная булка N-200i (верх)')
+      constructor.getByText('Краторная булка N-200i (верх)')
     ).toBeVisible();
     await expect(
-      page.getByText('Краторная булка N-200i (низ)')
+      constructor.getByText('Краторная булка N-200i (низ)')
     ).toBeVisible();
   });
 
   test('should add main ingredient to constructor', async ({ page }) => {
     // Wait for ingredients to load
-    await page.waitForSelector('text=Филе Люминесцентного тетраодонтимформа');
+    await expect(
+      ingredientsSection(page).getByText('Филе Люминесцентного тетраодонтимформа')
+    ).toBeVisible();
 
     // Find the main ingredient and click "Добавить"
-    const mainContainer = page
+    const mainContainer = ingredientsSection(page)
       .locator('li')
       .filter({ hasText: 'Филе Люминесцентного тетраодонтимформа' });
-    const addButton = mainContainer.getByText('Добавить');
-    await addButton.click();
+    await mainContainer.getByText('Добавить').click();
 
-    // Verify ingredient appears in constructor (use first() to avoid strict mode
-    // since the ingredient name appears both in the list and in the constructor)
+    // Verify ingredient appears in constructor section
     await expect(
-      page.getByText('Филе Люминесцентного тетраодонтимформа').first()
+      constructorSection(page).getByText('Филе Люминесцентного тетраодонтимформа')
     ).toBeVisible();
   });
 
   test('should add sauce ingredient to constructor', async ({ page }) => {
     // Wait for ingredients to load
-    await page.waitForSelector('text=Соус Spicy-X');
+    await expect(
+      ingredientsSection(page).getByText('Соус Spicy-X')
+    ).toBeVisible();
 
     // Find the sauce ingredient and click "Добавить"
-    const sauceContainer = page
+    const sauceContainer = ingredientsSection(page)
       .locator('li')
       .filter({ hasText: 'Соус Spicy-X' });
-    const addButton = sauceContainer.getByText('Добавить');
-    await addButton.click();
+    await sauceContainer.getByText('Добавить').click();
 
-    // Verify ingredient appears in constructor (use first() to avoid strict mode
-    // since the ingredient name appears both in the list and in the constructor)
+    // Verify ingredient appears in constructor section
     await expect(
-      page.getByText('Соус Spicy-X').first()
+      constructorSection(page).getByText('Соус Spicy-X')
     ).toBeVisible();
   });
 
@@ -101,33 +111,45 @@ test.describe('Constructor Page', () => {
     page
   }) => {
     // Wait for ingredients to load
-    await page.waitForSelector('text=Краторная булка N-200i');
+    await expect(
+      ingredientsSection(page).getByText('Краторная булка N-200i')
+    ).toBeVisible();
 
-    // Click on the ingredient link (name) - use first() to get the ingredient list item
-    await page.getByText('Краторная булка N-200i').first().click();
+    // Click on the ingredient name in the ingredients section
+    await ingredientsSection(page).getByText('Краторная булка N-200i').click();
+
+    const modals = modalsContainer(page);
 
     // Verify modal with ingredient details is opened
-    await expect(page.getByText('Детали ингредиента')).toBeVisible();
-    // The ingredient name appears both in the list and in the modal heading
+    await expect(modals.getByText('Детали ингредиента')).toBeVisible();
+    // Verify the ingredient name is in the modal
     await expect(
-      page.getByText('Краторная булка N-200i').first()
+      modals.getByText('Краторная булка N-200i')
     ).toBeVisible();
+    // Verify specific nutritional characteristics of the clicked ingredient
+    // Mock data: Краторная булка N-200i has calories=420, proteins=80, fat=24, carbohydrates=53
+    await expect(modals.getByText('420')).toBeVisible();
+    await expect(modals.getByText('80')).toBeVisible();
+    await expect(modals.getByText('24')).toBeVisible();
+    await expect(modals.getByText('53')).toBeVisible();
   });
 
   test('should close ingredient modal by clicking close button', async ({
     page
   }) => {
     // Wait for ingredients to load
-    await page.waitForSelector('text=Краторная булка N-200i');
+    await expect(
+      ingredientsSection(page).getByText('Краторная булка N-200i')
+    ).toBeVisible();
 
     // Open ingredient modal
-    await page.getByText('Краторная булка N-200i').first().click();
-    await expect(page.getByText('Детали ингредиента')).toBeVisible();
+    await ingredientsSection(page).getByText('Краторная булка N-200i').click();
+    await expect(
+      modalsContainer(page).getByText('Детали ингредиента')
+    ).toBeVisible();
 
     // Close modal by clicking the close button in the modal header
-    // The modal is rendered via portal into #modals element
-    // The close button is inside #modals > div:first-child > div:first-child > button
-    const modalContainer = page.locator('#modals');
+    const modalContainer = modalsContainer(page);
     const closeButton = modalContainer
       .locator('div')
       .first()
@@ -135,122 +157,140 @@ test.describe('Constructor Page', () => {
     await closeButton.click();
 
     // Verify modal is closed
-    await expect(page.getByText('Детали ингредиента')).not.toBeVisible();
+    await expect(
+      modalsContainer(page).getByText('Детали ингредиента')
+    ).not.toBeVisible();
   });
 
   test('should close ingredient modal by clicking overlay', async ({
     page
   }) => {
     // Wait for ingredients to load
-    await page.waitForSelector('text=Краторная булка N-200i');
+    await expect(
+      ingredientsSection(page).getByText('Краторная булка N-200i')
+    ).toBeVisible();
 
     // Open ingredient modal
-    await page.getByText('Краторная булка N-200i').first().click();
-    await expect(page.getByText('Детали ингредиента')).toBeVisible();
+    await ingredientsSection(page).getByText('Краторная булка N-200i').click();
+    await expect(
+      modalsContainer(page).getByText('Детали ингредиента')
+    ).toBeVisible();
 
     // Close modal by clicking the overlay
     // The overlay is a fixed-position div covering the full screen behind the modal
     // Click at the top-left corner of the viewport (outside the modal area)
-    // to trigger the overlay's onClick handler
     const box = await page.locator('#modals > div').nth(1).boundingBox();
     if (box) {
-      // Click at the top-left corner of the overlay (outside the modal)
       await page.mouse.click(box.x + 5, box.y + 5);
     }
 
     // Verify modal is closed
-    await expect(page.getByText('Детали ингредиента')).not.toBeVisible();
+    await expect(
+      modalsContainer(page).getByText('Детали ингредиента')
+    ).not.toBeVisible();
   });
 
   test.describe('Order creation', () => {
-    test.beforeEach(async ({ page }) => {
+    test.beforeEach(async ({ page, context }) => {
       // Set mock auth tokens before each order test
-      // addInitScript runs before page navigation, so we need to re-navigate
-      await page.addInitScript(
-        ({ accessToken, refreshToken }) => {
-          document.cookie = `accessToken=${accessToken}; path=/`;
-          localStorage.setItem('refreshToken', refreshToken);
-        },
-        { accessToken: TEST_ACCESS_TOKEN, refreshToken: TEST_REFRESH_TOKEN }
-      );
+      // Use context.addCookies for Playwright-level cookie management
+      await context.addCookies([
+        {
+          name: 'accessToken',
+          value: TEST_ACCESS_TOKEN,
+          url: 'http://localhost:4000'
+        }
+      ]);
+      // Use page.evaluate for localStorage (runs immediately on the current page)
+      await page.evaluate((token) => {
+        localStorage.setItem('refreshToken', token);
+      }, TEST_REFRESH_TOKEN);
 
-      // Re-navigate to apply the auth tokens set by addInitScript
       await page.goto('/');
     });
 
-    test.afterEach(async ({ page }) => {
-      // Clean up auth tokens after each order test
-      await page.addInitScript(() => {
+    test.afterEach(async ({ page, context }) => {
+      // Immediately clear auth tokens on the current page using page.evaluate
+      await page.evaluate(() => {
         document.cookie =
           'accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
         localStorage.removeItem('refreshToken');
       });
+      // Also clear Playwright context-level cookies to prevent leakage
+      await context.clearCookies();
     });
 
     test('should create order successfully', async ({ page }) => {
       // Wait for ingredients to load
-      await page.waitForSelector('text=Краторная булка N-200i');
+      await expect(
+        ingredientsSection(page).getByText('Краторная булка N-200i')
+      ).toBeVisible();
 
       // Add bun to constructor
-      const bunContainer = page
+      const bunContainer = ingredientsSection(page)
         .locator('li')
         .filter({ hasText: 'Краторная булка N-200i' });
       await bunContainer.getByText('Добавить').click();
 
       // Add main ingredient to constructor
-      const mainContainer = page
+      const mainContainer = ingredientsSection(page)
         .locator('li')
         .filter({ hasText: 'Филе Люминесцентного тетраодонтимформа' });
       await mainContainer.getByText('Добавить').click();
 
       // Click "Оформить заказ" button
-      await page.getByText('Оформить заказ').click();
+      await constructorSection(page).getByText('Оформить заказ').click();
+
+      const modals = modalsContainer(page);
 
       // Wait for order modal to appear with order number
-      // The order number is rendered in an h2 with class text_type_digits-large
-      await expect(page.getByText('54321')).toBeVisible();
-      await expect(page.getByText('идентификатор заказа')).toBeVisible();
+      await expect(modals.getByText('54321')).toBeVisible();
+      await expect(modals.getByText('идентификатор заказа')).toBeVisible();
     });
 
     test('should close order modal and verify constructor is empty', async ({
       page
     }) => {
       // Wait for ingredients to load
-      await page.waitForSelector('text=Краторная булка N-200i');
+      await expect(
+        ingredientsSection(page).getByText('Краторная булка N-200i')
+      ).toBeVisible();
 
       // Add bun to constructor
-      const bunContainer = page
+      const bunContainer = ingredientsSection(page)
         .locator('li')
         .filter({ hasText: 'Краторная булка N-200i' });
       await bunContainer.getByText('Добавить').click();
 
       // Add main ingredient
-      const mainContainer = page
+      const mainContainer = ingredientsSection(page)
         .locator('li')
         .filter({ hasText: 'Филе Люминесцентного тетраодонтимформа' });
       await mainContainer.getByText('Добавить').click();
 
       // Click "Оформить заказ"
-      await page.getByText('Оформить заказ').click();
+      await constructorSection(page).getByText('Оформить заказ').click();
+
+      const modals = modalsContainer(page);
 
       // Wait for order modal
-      await expect(page.getByText('54321')).toBeVisible();
+      await expect(modals.getByText('54321')).toBeVisible();
 
-      // Close order modal - the modal is rendered via portal into #modals
-      const modalContainer = page.locator('#modals');
-      const closeButton = modalContainer
+      // Close order modal
+      const closeButton = modals
         .locator('div')
         .first()
         .locator('button');
       await closeButton.click();
 
       // Verify modal is closed
-      await expect(page.getByText('54321')).not.toBeVisible();
+      await expect(modals.getByText('54321')).not.toBeVisible();
+
+      const constructor = constructorSection(page);
 
       // Verify constructor is empty - should show placeholder texts
-      // "Выберите булки" appears twice (top and bottom), use first()
-      await expect(page.getByText('Выберите булки').first()).toBeVisible();
-      await expect(page.getByText('Выберите начинку')).toBeVisible();
+      await expect(constructor.getByText('Выберите булки').first()).toBeVisible();
+      await expect(constructor.getByText('Выберите начинку')).toBeVisible();
     });
   });
 });
