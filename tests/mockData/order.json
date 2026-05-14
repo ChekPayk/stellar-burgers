@@ -1,0 +1,18 @@
+{
+  "success": true,
+  "order": {
+    "_id": "test-order-id-123",
+    "status": "done",
+    "name": "Test order",
+    "createdAt": "2026-05-13T18:00:00.000Z",
+    "updatedAt": "2026-05-13T18:00:00.000Z",
+    "number": 54321,
+    "ingredients": [
+      "643d69a5c3f7b9001cfa093c",
+      "643d69a5c3f7b9001cfa093e",
+      "643d69a5c3f7b9001cfa093c"
+    ],
+    "price": 3498
+  },
+  "name": "Test order"
+}
