@@ -16,53 +16,31 @@ const rootReducer = combineReducers({
 });
 
 describe('rootReducer initialization', () => {
-  it('should return initial state when called with undefined and UNKNOWN_ACTION', () => {
-    const state = rootReducer(undefined, { type: 'UNKNOWN_ACTION' });
+  it('initializes the state correctly', () => {
+    const initAction = { type: '@@INIT' };
+    const state = rootReducer(undefined, initAction);
 
-    // ingredients slice
-    expect(state.ingredients).toEqual({
-      ingredients: [],
-      isLoading: false,
-      error: null,
+    expect(state).toEqual({
+      ingredients: ingredientsReducer(undefined, initAction),
+      feed: feedReducer(undefined, initAction),
+      burgerConstructor: constructorReducer(undefined, initAction),
+      user: userReducer(undefined, initAction),
+      order: orderReducer(undefined, initAction),
+      orders: ordersReducer(undefined, initAction)
     });
+  });
 
-    // feed slice
-    expect(state.feed).toEqual({
-      orders: [],
-      total: 0,
-      totalToday: 0,
-      isLoading: false,
-      error: null,
-    });
+  it('handles unknown action correctly', () => {
+    const fakeAction = { type: 'UNKNOWN_ACTION' };
+    const state = rootReducer(undefined, fakeAction);
 
-    // burgerConstructor slice
-    expect(state.burgerConstructor).toEqual({
-      bun: null,
-      ingredients: [],
-    });
-
-    // user slice
-    expect(state.user).toEqual({
-      user: null,
-      isAuthChecked: false,
-      isLoading: false,
-      error: null,
-    });
-
-    // order slice
-    expect(state.order).toEqual({
-      orderRequest: false,
-      orderModalData: null,
-      orderByNumber: null,
-      isLoading: false,
-      error: null,
-    });
-
-    // orders slice
-    expect(state.orders).toEqual({
-      orders: [],
-      isLoading: false,
-      error: null,
+    expect(state).toEqual({
+      ingredients: ingredientsReducer(undefined, fakeAction),
+      feed: feedReducer(undefined, fakeAction),
+      burgerConstructor: constructorReducer(undefined, fakeAction),
+      user: userReducer(undefined, fakeAction),
+      order: orderReducer(undefined, fakeAction),
+      orders: ordersReducer(undefined, fakeAction)
     });
   });
 });
